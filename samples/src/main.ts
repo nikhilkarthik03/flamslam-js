@@ -28,7 +28,6 @@ class CameraDemo {
   // Performance tracking
   private frameCount = 0;
   private lastFpsUpdate = 0;
-  private lastFrameTime = 0;
   private fps = 0;
   private processingTime = 0;
 
@@ -177,8 +176,6 @@ class CameraDemo {
    */
   private processFrame = (): void => {
     if (!this.isRunning) return;
-
-    const startTime = performance.now();
 
     // Draw original frame
     this.originalCtx.drawImage(this.video, 0, 0);

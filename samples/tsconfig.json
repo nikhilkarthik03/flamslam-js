@@ -6,7 +6,10 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "types": ["vite/client"],
     "skipLibCheck": true,
-
+    "paths": {
+      "flamslam-js": ["../dist/index.d.ts"],
+      "flamslam-js/*": ["../dist/*"]
+    },
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,

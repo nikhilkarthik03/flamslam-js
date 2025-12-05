@@ -21,14 +21,14 @@ export class ImageProcessing {
    * Uses OpenCV luminance formula with float precision:
    *   Y = 0.299 * R + 0.587 * G + 0.114 * B
    *
-   * @param src Raw pixel buffer (Uint8Array from canvas/video)
+   * @param src Raw pixel buffer (Uint8Array | Uint8ClampedArray from canvas/video)
    * @param w Image width
    * @param h Image height
    * @param dst Output grayscale matrix (U8C1), auto-resized
    * @param code ColorConversion enum for input format
    */
   public grayscale(
-    src: Uint8Array,
+    src: Uint8Array | Uint8ClampedArray,
     w: number,
     h: number,
     dst: Matrix,
