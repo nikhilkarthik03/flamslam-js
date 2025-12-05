@@ -89,8 +89,6 @@
         left: 0;
         right: 0;
         bottom: 80px;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
         gap: 0;
       }
 
@@ -209,12 +207,12 @@
       </div>
     </div>
 
+    <div class="canvas-wrapper loading" style="display: none">
+      <h3>Original Feed</h3>
+      <canvas id="originalCanvas"></canvas>
+    </div>
     <!-- Fullscreen canvas container -->
     <div class="canvas-container">
-      <div class="canvas-wrapper loading">
-        <h3>Original Feed</h3>
-        <canvas id="originalCanvas"></canvas>
-      </div>
       <div class="canvas-wrapper loading">
         <h3>Grayscale (OpenCV-style)</h3>
         <canvas id="grayscaleCanvas"></canvas>
