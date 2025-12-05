@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FlamSlam Camera Demo</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #000;
+        color: #fff;
+        overflow: hidden;
+        height: 100vh;
+        width: 100vw;
+      }
+
+      /* Top control bar */
+      .controls-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(10px);
+        padding: 15px 20px;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .title {
+        font-size: 18px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .controls {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      button {
+        padding: 8px 16px;
+        background: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s;
+      }
+
+      button:hover {
+        background: #45a049;
+        transform: translateY(-1px);
+      }
+
+      button:disabled {
+        background: #333;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      button.danger {
+        background: #f44336;
+      }
+
+      button.danger:hover {
+        background: #da190b;
+      }
+
+      /* Fullscreen canvas container */
+      .canvas-container {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        bottom: 80px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+      }
+
+      .canvas-wrapper {
+        position: relative;
+        background: #000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+
+      .canvas-wrapper h3 {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        font-size: 12px;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.6);
+        background: rgba(0, 0, 0, 0.5);
+        padding: 5px 10px;
+        border-radius: 4px;
+        z-index: 10;
+      }
+
+      canvas {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        display: block;
+      }
+
+      #videoElement {
+        display: none;
+      }
+
+      /* Bottom stats bar */
+      .stats {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(10px);
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        z-index: 100;
+      }
+
+      .stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .stat-label {
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.5);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .stat-value {
+        font-size: 20px;
+        font-weight: 700;
+        color: #4caf50;
+      }
+
+      /* Responsive layout */
+      @media (max-width: 768px) {
+        .canvas-container {
+          grid-template-columns: 1fr;
+          grid-template-rows: 1fr 1fr;
+        }
+
+        .title {
+          font-size: 14px;
+        }
+
+        .stats {
+          padding: 10px;
+        }
+
+        .stat-value {
+          font-size: 16px;
+        }
+
+        .stat-label {
+          font-size: 9px;
+        }
+      }
+
+      /* Loading state */
+      .canvas-wrapper.loading::before {
+        content: 'Initializing camera...';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Top control bar -->
+    <div class="controls-bar">
+      <div class="title">🎥 FlamSlam Camera Demo</div>
+      <div class="controls">
+        <button id="startBtn">Start Camera</button>
+        <button id="stopBtn" disabled class="danger">Stop Camera</button>
+      </div>
+    </div>
+
+    <!-- Fullscreen canvas container -->
+    <div class="canvas-container">
+      <div class="canvas-wrapper loading">
+        <h3>Original Feed</h3>
+        <canvas id="originalCanvas"></canvas>
+      </div>
+      <div class="canvas-wrapper loading">
+        <h3>Grayscale (OpenCV-style)</h3>
+        <canvas id="grayscaleCanvas"></canvas>
+      </div>
+    </div>
+
+    <!-- Bottom stats bar -->
+    <div class="stats">
+      <div class="stat">
+        <span class="stat-label">FPS</span>
+        <span class="stat-value" id="fps">0</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Processing</span>
+        <span class="stat-value" id="procTime">0ms</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Resolution</span>
+        <span class="stat-value" id="resolution">-</span>
+      </div>
+      <div class="stat">
+        <span class="stat-label">Status</span>
+        <span class="stat-value" id="status">Idle</span>
+      </div>
+    </div>
+
+    <video id="videoElement" autoplay playsinline></video>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
